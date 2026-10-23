@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "weight_policy": {
+    "version": 1,
+    "basis": "business_priority",
+    "core_min_share": 0.5
+  },
+  "gate_tests": [
+    "test_outputs.py::test_gate_covering_portfolio_has_complete_ledger"
+  ],
+  "tests": {
+    "test_outputs.py::test_coupon_timing_beats_cheapest_per_face_value": {
+      "weight": 0.18,
+      "priority": "core",
+      "rationale": "票息到账年度决定哪只手数组合真正覆盖负债，是不能用单价替代的核心约束。"
+    },
+    "test_outputs.py::test_credit_floor_forces_replacement_of_cheap_bb_bond": {
+      "weight": 0.18,
+      "priority": "core",
+      "rationale": "全组合信用质量下限会改变最优券种，直接决定保险账户能否通过合规复核。"
+    },
+    "test_outputs.py::test_cash_surplus_cannot_cover_an_earlier_shortfall": {
+      "weight": 0.18,
+      "priority": "core",
+      "rationale": "年度现金不可结转是现金流匹配的基本口径，错判会造成真实年度缺口。"
+    },
+    "test_outputs.py::test_eight_lots_per_instrument_is_accepted": {
+      "weight": 0.07,
+      "priority": "boundary",
+      "rationale": "公开手数上界必须能够参与真实券池优化，否则合法大额负债无法建模。"
+    },
+    "test_outputs.py::test_nine_lots_per_instrument_is_refused": {
+      "weight": 0.07,
+      "priority": "schema",
+      "rationale": "超过手数上界立即拒绝，避免搜索空间被非法输入无界放大。"
+    },
+    "test_outputs.py::test_uncoverable_liability_returns_business_infeasible": {
+      "weight": 0.07,
+      "priority": "boundary",
+      "rationale": "合法但无法覆盖的债务应返回业务无解，不能与格式损坏混为一谈。"
+    },
+    "test_outputs.py::test_duplicate_bond_id_is_refused_without_output": {
+      "weight": 0.06,
+      "priority": "schema",
+      "rationale": "重复债券号会覆盖手数台账，导致成本与覆盖计算失去唯一对应关系。"
+    },
+    "test_outputs.py::test_success_output_is_canonical_and_stdout_empty": {
+      "weight": 0.06,
+      "priority": "supporting",
+      "rationale": "估值系统按字节接收结果，稳定序列化可避免无意义的日终差异。"
+    },
+    "test_outputs.py::test_wrong_argument_count_keeps_rejection_contract": {
+      "weight": 0.06,
+      "priority": "recovery",
+      "rationale": "调度器误传参数时必须明确拒绝，防止空白或错误路径被当作成功。"
+    },
+    "test_outputs.py::test_zero_bond_price_is_refused_without_output": {
+      "weight": 0.07,
+      "priority": "schema",
+      "rationale": "零价格债券会伪造无限性价比并破坏成本排序，必须在优化前拒绝。"
+    }
+  }
+}
