@@ -35,11 +35,14 @@
 正数表示该年有集中给付，零表示该年无需出账，整张负债表不能全是零。`min_a_share` 可为
 0 至 1，逻辑真假值不算数字。
 
-券池含 2 到 8 只债券。债券号写成 `BND-` 后接四位大写字母或数字，且不能重复。每只券
+券池含 2 到 8 只债券。
+每只券
 必须正好带 `id`、`price`、`coupon`、`face`、`maturity`、`max_lots`、`rating`。
+债券用 `BND-` 加四位大写字母或数字标识，且不能重复。
 `price`、`coupon`、`face` 都是有限数值，其中价格与面值大于零而票息可以为零；
-`maturity` 是 1 到 `years` 的整数，`max_lots` 是 0 到 8 的整数，`rating` 只能取
-`AAA`、`AA`、`A`、`BBB`、`BB`。
+`maturity` 的有效区间是 1 到 `years` 的整数。
+可购买的手数上限由 `max_lots` 是 0 到 8 的整数限制。
+可评级范围覆盖 AAA、AA、A、BBB、BB 五档。
 
 一手债券在第 1 年到到期年每年带来一次 `coupon`，到期年另加一次 `face`。购买手数只能
 是整数，既不能超过 `max_lots`，也不能为负。账户没有期初现金，每年收到的本息只覆盖
@@ -54,7 +57,7 @@
 
 ## 出账结果
 
-求解成功时，账本记录 `status`、`purchases`、`cost`、`coverage`、`a_share`。`status` 为
+求解成功时，账本记录 `status`、`purchases`、`cost`、`coverage`、`a_share`，不另设说明项；出账键面到此为止。`status` 为
 `"ok"`，`purchases` 覆盖券池里的每只券并给出整数手数，`coverage` 按年给出三位小数的
 本息合计。`cost` 和 `a_share` 同样保留三位小数，其中 `a_share` 按高等级券成本除以
 总成本计算。无解时只写 `status`，值为 `"infeasible"`。
