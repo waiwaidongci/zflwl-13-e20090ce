@@ -143,7 +143,7 @@ def test_credit_floor_forces_replacement_of_cheap_bb_bond(tmp_path: Path) -> Non
 def test_cash_surplus_cannot_cover_an_earlier_shortfall(tmp_path: Path) -> None:
     # case_id: CF-CASH-01
     """题面：
-    「`maturity` 是 1 到 `years` 的整数，`max_lots` 是 0 到 8 的整数，`rating` 只能取」
+    「未用完的钱不会留到下一年。」
     """
 
     payload = {
@@ -236,7 +236,7 @@ def test_uncoverable_liability_returns_business_infeasible(tmp_path: Path) -> No
 def test_duplicate_bond_id_is_refused_without_output(tmp_path: Path) -> None:
     # case_id: CF-SCHEMA-01
     """题面：
-    「券池含 2 到 8 只债券。债券号写成 `BND-` 后接四位大写字母或数字，且不能重复。每只券」
+    「债券用 `BND-` 加四位大写字母或数字标识，且不能重复。」
     """
 
     payload = _base_payload()
