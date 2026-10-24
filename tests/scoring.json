@@ -25,12 +25,12 @@
       "rationale": "年度现金不可结转是现金流匹配的基本口径，错判会造成真实年度缺口。"
     },
     "test_outputs.py::test_eight_lots_per_instrument_is_accepted": {
-      "weight": 0.07,
+      "weight": 0.05,
       "priority": "boundary",
       "rationale": "公开手数上界必须能够参与真实券池优化，否则合法大额负债无法建模。"
     },
     "test_outputs.py::test_nine_lots_per_instrument_is_refused": {
-      "weight": 0.07,
+      "weight": 0.05,
       "priority": "schema",
       "rationale": "超过手数上界立即拒绝，避免搜索空间被非法输入无界放大。"
     },
@@ -55,9 +55,14 @@
       "rationale": "调度器误传参数时必须明确拒绝，防止空白或错误路径被当作成功。"
     },
     "test_outputs.py::test_zero_bond_price_is_refused_without_output": {
-      "weight": 0.07,
+      "weight": 0.06,
       "priority": "schema",
       "rationale": "零价格债券会伪造无限性价比并破坏成本排序，必须在优化前拒绝。"
+    },
+    "test_outputs.py::test_eight_year_ledger_accepts_sparse_payment_days": {
+      "weight": 0.05,
+      "priority": "boundary",
+      "rationale": "八年入力与稀疏正负债共同验证叙述中的三至八年给付安排和逐年覆盖口径。"
     }
   }
 }

@@ -9,12 +9,22 @@ from pathlib import Path
 
 ENTRY = os.environ.get("PORTFOLIO_ENTRY", "/app/allocate.py")
 
+SAFE_ENV = {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "/tmp",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONHASHSEED": "0",
+}
+
 
 def _run(payload: Path, output: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, ENTRY, str(payload), str(output)],
+        [sys.executable, "-S", "-P", "-B", ENTRY, str(payload), str(output)],
         text=True,
         capture_output=True,
+        env=SAFE_ENV,
         timeout=30,
         check=False,
     )
@@ -55,6 +65,40 @@ def test_gate_covering_portfolio_has_complete_ledger(tmp_path: Path) -> None:
     assert result["status"] == "ok"
     assert set(result) == {"status", "purchases", "cost", "coverage", "a_share"}
     assert result["coverage"] == [145.0, 145.0, 115.0]
+
+
+def test_eight_year_ledger_accepts_sparse_payment_days(tmp_path: Path) -> None:
+    """题面：
+    「年金账户未来三至八年有一组按年排布的集中给付安排」
+    「正数表示该年有集中给付，零表示该年无需出账」
+    """
+
+    # case_id: CF-CONTEXT-02
+    payload = {
+        "schema": "cash-match-v1",
+        "years": 8,
+        "liabilities": [100, 0, 100, 0, 0, 0, 0, 100],
+        "min_a_share": 0.0,
+        "instruments": [
+            {"id": "BND-0001", "price": 100, "coupon": 0, "face": 100, "maturity": 1, "max_lots": 1, "rating": "AAA"},
+            {"id": "BND-0003", "price": 100, "coupon": 0, "face": 100, "maturity": 3, "max_lots": 1, "rating": "AAA"},
+            {"id": "BND-0008", "price": 100, "coupon": 0, "face": 100, "maturity": 8, "max_lots": 1, "rating": "AAA"},
+        ],
+    }
+    source = tmp_path / "eight-year.json"
+    output = tmp_path / "eight-year.out.json"
+    _write(source, payload)
+    completed = _run(source, output)
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert completed.returncode == 0
+    assert completed.stdout == ""
+    assert result["cost"] == 300.0
+    assert result["coverage"] == [100.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 100.0]
+    assert result["purchases"] == {
+        "BND-0001": 1,
+        "BND-0003": 1,
+        "BND-0008": 1,
+    }
 
 
 def test_coupon_timing_beats_cheapest_per_face_value(tmp_path: Path) -> None:
@@ -260,10 +304,11 @@ def test_wrong_argument_count_keeps_rejection_contract(tmp_path: Path) -> None:
     journal = tmp_path / "allocate-journal.jsonl"
     summary = tmp_path / "allocate-summary.json"
     completed = subprocess.run(
-        [sys.executable, ENTRY, str(source)],
+        [sys.executable, "-S", "-P", "-B", ENTRY, str(source)],
         cwd=tmp_path,
         text=True,
         capture_output=True,
+        env=SAFE_ENV,
         timeout=10,
         check=False,
     )
